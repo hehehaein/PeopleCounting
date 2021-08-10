@@ -5,6 +5,7 @@ import pafy
 #cuda 사용가능여부 확인
 #ount = cv2.cuda.getCudaEnabledDeviceCount()
 #print(count)
+
 # 클래스 리스트
 classes = ["person", "bicycle", "car", "motorcycle",
            "airplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant",
@@ -19,10 +20,6 @@ classes = ["person", "bicycle", "car", "motorcycle",
            "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator",
            "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"]
 
-
-# 입력 사이즈 리스트 (Yolo 에서 사용되는 네크워크 입력 이미지 사이즈)
-size_list = [320, 416, 608]
-
 # YOLO 네트워크 불러오기
 net = cv2.dnn.readNet("C:\\Users\\admin\\PycharmProjects\\peoplecounting\\yolov3\\yolov3.weights",
                       "C:\\Users\\admin\\PycharmProjects\\peoplecounting\\yolov3\\yolov3.cfg")
@@ -32,11 +29,8 @@ colors = np.random.uniform(0, 255, size=(len(classes),3))
 
 def yolo(frame,size, score_threshold, nms_threshold):
 
-
     layer_names = net.getLayerNames()
     output_layers = [layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
-
-
 
     #이미지의 높이, 너비, 채널 받아오기
     height, width, channels = frame.shape
@@ -56,6 +50,7 @@ def yolo(frame,size, score_threshold, nms_threshold):
     class_ids = []
     confidences = []
     boxes = []
+    centers = []
 
     for out in outs:
         for detection in out:
@@ -97,6 +92,10 @@ def yolo(frame,size, score_threshold, nms_threshold):
             class_name = classes[class_ids[i]]
             label = f"{class_name} {confidences[i]:.2f}"
             color = colors[class_ids[i]]
+            center_x = (x+w)/2
+            center_y = (y+h)/2
+            centers = np.zeros(shape=(len(boxes),2))
+            centers[i] = [center_x,center_y]
 
             # 사각형 테두리 그리기 및 텍스트 쓰기
             cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
@@ -104,21 +103,13 @@ def yolo(frame,size, score_threshold, nms_threshold):
             cv2.putText(frame, label, (x, y - 8), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 0), 2)
 
             # 탐지된 객체의 정보 출력
-            print(f"[{class_name}({i})] conf: {confidences[i]} / x: {x} / y: {y} / width: {w} / height: {h}")
+            print(f"[{class_name}({i})] conf: {confidences[i]} / x:{x} y:{y} width:{w} height:{h} / centers:{centers[i]} ")
     return frame
 
 url = "https://www.youtube.com/watch?v=DW8x_EqZnxU"
 video = pafy.new(url)
-
 print("video title : {}".format(video.title))  # 제목
-print("video rating : {}".format(video.rating))  # 평점
-print("video viewcount : {}".format(video.viewcount))  # 조회수
-print("video author : {}".format(video.author))  # 저작권자
-print("video length : {}".format(video.length))  # 길이
 print("video duration : {}".format(video.duration))  # 길이
-print("video likes : {}".format(video.likes)) # 좋아요
-print("video dislikes : {}".format(video.dislikes)) #싫어요
-
 best = video.getbest(preftype="mp4")
 print("best resolution : {}".format(best.resolution))
 
@@ -126,6 +117,10 @@ capture = cv2.VideoCapture(best.url)
 #capture = capture = cv2.VideoCapture(0)
 #capture = cv2.VideoCapture("rtsp://admin:admin123!@192.168.0.51/profile2/media.smp")
 #capture = cv2.VideoCapture("C:\\Users\\admin\\Desktop\\test.avi")
+
+# 입력 사이즈 리스트 (Yolo 에서 사용되는 네크워크 입력 이미지 사이즈)
+size_list = [320, 416, 608]
+
 while True:
     ret, frame = capture.read() #프레임 읽기:카메라의 상태, 프레임
     #frame2 = cv2.resize(frame,dsize=(0,0),fx=0.5,fy=0.5,interpolation=cv2.INTER_LINEAR)
