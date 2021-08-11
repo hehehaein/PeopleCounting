@@ -8,7 +8,6 @@ import math
 from centroidtracker import CentroidTracker
 from trackableobject import TrackableObject
 
-
 # cuda 사용가능여부 확인
 # ount = cv2.cuda.getCudaEnabledDeviceCount()
 # print(count)
@@ -29,16 +28,16 @@ classes = ["person", "bicycle", "car", "motorcycle",
            "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"]
 
 # Initialize the parameters
-confThreshold = 0.6  #Confidence threshold
-nmsThreshold = 0.4   #Non-maximum suppression threshold
-inpWidth = 416       #Width of network's input image
-inpHeight = 416      #Height of network's input image
+confThreshold = 0.6  # Confidence threshold
+nmsThreshold = 0.4  # Non-maximum suppression threshold
+inpWidth = 416  # Width of network's input image
+inpHeight = 416  # Height of network's input image
 
-#인자값을 받을 수 있는 인스턴스 생성
+# 인자값을 받을 수 있는 인스턴스 생성
 parser = argparse.ArgumentParser(description='Object Detection using YOLO in OPENCV')
-#입력받을 인자값 등록
+# 입력받을 인자값 등록
 parser.add_argument('--video', help='Path to video file.')
-#입력받은 인자값을 arg에 저장 (type:namespace)
+# 입력받은 인자값을 arg에 저장 (type:namespace)
 args = parser.parse_args()
 
 # initialize the vide
@@ -53,14 +52,12 @@ H = None
 net = cv2.dnn.readNet("C:\\Users\\admin\\PycharmProjects\\peoplecounting\\yolov3\\yolov3.weights",
                       "C:\\Users\\admin\\PycharmProjects\\peoplecounting\\yolov3\\yolov3.cfg")
 
-
 url = "https://www.youtube.com/watch?v=DW8x_EqZnxU"
 video = pafy.new(url)
 print("video title : {}".format(video.title))  # 제목
 print("video duration : {}".format(video.duration))  # 길이
 best = video.getbest(preftype="mp4")
 print("best resolution : {}".format(best.resolution))
-
 
 # 클래스의 개수만큼 랜덤 RGB 배열 생성
 colors = np.random.uniform(0, 255, size=(len(classes), 3))
@@ -166,10 +163,11 @@ def getOutputsNames(net):
     # Get the names of the output layers, i.e. the layers with unconnected outputs
     return [layersNames[i[0] - 1] for i in net.getUnconnectedOutLayers()]
 
+
 # Draw the predicted bounding box
 def drawPred(classId, conf, left, top, right, bottom):
     # Draw a bounding box.
-    #cv2.rectangle(frame, (left, top), (right, bottom), (255, 178, 50), 2)
+    # cv2.rectangle(frame, (left, top), (right, bottom), (255, 178, 50), 2)
     # Draw a center of a bounding box
     frameHeight = frame.shape[0]
     frameWidth = frame.shape[1]
@@ -288,7 +286,7 @@ def counting(objects):
         # object on the output frame
         text = "ID {}".format(objectID)
         cv2.putText(frame, text, (centroid[0] - 10, centroid[1] - 10),
-        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
         cv2.circle(frame, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
     # construct a tuple of information we will be displaying on the
     # frame
@@ -301,14 +299,14 @@ def counting(objects):
     for (i, (k, v)) in enumerate(info):
         text = "{}: {}".format(k, v)
         cv2.putText(frame, text, (50, frameHeight - ((i * 20) + 50)),
-                   cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
 
 # Process inputs
 winName = 'Deep learning object detection in OpenCV'
 cv2.namedWindow(winName, cv2.WINDOW_NORMAL)
 
-outputFile = "yolo_out_py.avi"
+outputFile = "hyein_people_counting_result"
 # 네트워크에 넣기 위한 전처리
 
 net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
@@ -320,14 +318,13 @@ if (args.video):
         print("Input video file ", args.video, " doesn't exist")
         sys.exit(1)
     cap = cv2.VideoCapture(0)
-    outputFile = args.video[:-4] + '_yolo_out_py.avi'
+    outputFile = args.video[:-4] + '__hyein_people_counting_result.avi'
 else:
     # Webcam input
     cap = cv2.VideoCapture("C:\\Users\\admin\\Desktop\\test.avi")
 
 # Get the video writer initialized to save the output video
-#vid_writer = cv2.VideoWriter(outputFile, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 30,
-                            #(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))))
+vid_writer = cv2.VideoWriter(outputFile, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 30, (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))))
 
 while cv2.waitKey(1) < 0:
 
@@ -365,16 +362,9 @@ while cv2.waitKey(1) < 0:
 
     # Write the frame with the detection boxes
 
-    #vid_writer.write(frame.astype(np.uint8))
+    vid_writer.write(frame.astype(np.uint8))
 
     cv2.imshow(winName, frame)
-
-
-
-
-
-
-
 
 """capture = cv2.VideoCapture(best.url)
 # capture = capture = cv2.VideoCapture(0)
